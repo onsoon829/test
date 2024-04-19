@@ -1,0 +1,7 @@
+.main_img {
+  /* background-color: black; */
+  width: 1000px;
+  height: 1100px;
+  background-size: cover;
+  background-image: url("/public/images/banner2.png");
+}

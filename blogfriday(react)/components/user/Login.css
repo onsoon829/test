@@ -1,0 +1,65 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.mx-5 {
+  width: 400px;
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+}
+
+button[type="submit"],
+.btn-primary {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button[type="submit"]:hover,
+.btn-primary:hover {
+  background-color: #007bff;
+}
+
+.btn-primary {
+  margin-right: 0.5rem;
+}
+
+/* 회원 가입 버튼 스타일 */
+.btn-signup {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #007bff;
+  border-radius: 0.25rem;
+  color: #007bff;
+  background-color: transparent;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-signup:hover {
+  background-color: #007bff;
+  color: #fff;
+}
