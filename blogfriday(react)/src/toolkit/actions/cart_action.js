@@ -6,8 +6,8 @@ import axios from "axios";
 export const fetchCartList = async (userId) => {
   try {
     const response = await axios.get("/api/cart/list/" + userId);
-    console.log(response);
-    return response.data;
+
+    return response;
   } catch (error) {
     console.log("fetchCartList :", error);
   }
@@ -21,6 +21,17 @@ export const fetchCartAdd = async (cartProductCode) => {
     return response.data;
   } catch (error) {
     console.log("fetchCartAdd :", error);
+  }
+};
+
+//장바구니 수정
+export const updateCartProductCount = async (cart_product_code) => {
+  try {
+    const response = await axios.put(`/update`, { cart_product_code });
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.log("updateCartProductCount :", error);
   }
 };
 
