@@ -119,19 +119,19 @@ public class CartController {
 	}
 	
 	//상품 수정
-	@PutMapping("/{cartproductcode}")
-	public ResponseEntity<Void>updateCart(@PathVariable("cartproductcode")
-	int cartProductCode, @RequestBody CartDTO cart){
-		cart.setCart_product_code(cartProductCode);
+	@PutMapping("/update/{cart_product_code}")
+	public ResponseEntity<Void>updateCart(@PathVariable("cart_product_code")
+	int cart_product_code, @RequestBody CartDTO cart){
+		cart.setCart_product_code(cart_product_code);
 		cartService.update(cart);
 		return ResponseEntity.ok().build();
 	}
 	
 	//상품 삭제
-	@DeleteMapping("/delete/{cartproductcode}")
-	public ResponseEntity<Void>deleteCart(@PathVariable ("cartproductcode")
-	int cartProductCode){
-		cartService.delete(cartProductCode);
+	@DeleteMapping("/delete/{cart_product_code}")
+	public ResponseEntity<Void>deleteCart(@PathVariable ("cart_product_code")
+	int cart_product_code){
+		cartService.delete(cart_product_code);
 		return ResponseEntity.ok().build();
 	}
 
