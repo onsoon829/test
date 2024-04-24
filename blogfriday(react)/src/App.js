@@ -25,26 +25,44 @@ import BaseLayout from "./components/layout/BaseLayout";
 import MyPage from "./components/user/MyPage";
 import SearchCategory from "./components/search/searchCategory";
 import CartComponent from "./components/cart/Cart";
+import FindID from "./components/user/FindID";
+import Okuser from "./components/user/Okuser";
+import FindPass from "./components/user/FindPass";
+import Loginshop from "./components/user/Loginshop";
+import ShopUserinfo from "./components/user/ShopUserinfo";
+import ShopUserEdit from "./components/user/ShopUserEdit";
 
 function App() {
   const location = useLocation();
+
+  const hideFooterRoutes = [
+    "/search/user/product/:product_code", // 여기는 동적 경로로 비교가 필요합니다.
+  ];
+
+  // 현재 경로가 hideFooterRoutes에 있는지 확인
+  const showFooter = !hideFooterRoutes.some((path) =>
+    // 동적 경로가 포함된 비교를 위해 RegExp 사용
+    new RegExp(path.replace(/:\w+/g, "\\w+")).test(location.pathname)
+  );
+
   const showLayout = ![
     // user 부분
     "/",
     "/page",
-    "login",
+    "/loginshop",
     "/joinadd",
     "/logout",
     "/editinfo",
     "/userRemove",
+    "/findid",
+    "/okuser",
+    "/findpass",
 
     // chat 부분
     "/chat/home",
     "/chat",
     "/chat/dot",
     "/chat/set",
-
-    //cart 부분
   ].includes(location.pathname);
   return (
     <div className="app">
@@ -52,7 +70,7 @@ function App() {
 
       {showLayout ? (
         <div className="body">
-          <div className="body_blank"></div>
+          {/* <div className="body_blank"></div> */}
           <Routes>
             <Route path="/shophome" element={<Main />} />
             <Route path="/mypage" element={<MyPage />} />
@@ -74,10 +92,12 @@ function App() {
             />
             <Route path="/payment/:product_code" element={<PaymentPage />} />
             <Route path="/order/complete" element={<PaymentCompletePage />} />
-
-            {/* cart 추가 */}
             <Route path="/cart" element={<CartComponent />} />
+            <Route path="/shopedininfo" element={<ShopUserinfo />} />
+
+            <Route path="/shopuseredit" element={<ShopUserEdit />} />
           </Routes>
+          {showFooter && <Footer />}
         </div>
       ) : (
         <Routes>
@@ -86,6 +106,11 @@ function App() {
             path="/"
             element={<PrivateRoute isAuth={false} RouteComponent={Login} />}
           />
+          <Route
+            path="/loginshop"
+            element={<PrivateRoute isAuth={false} RouteComponent={Loginshop} />}
+          />
+
           {/* <Route
             path="/page"
             element={
@@ -109,6 +134,21 @@ function App() {
             path="/userRemove"
             element={<PrivateRoute isAuth={true} RouteComponent={UserRemove} />}
           />
+          <Route
+            path="/findid"
+            element={<PrivateRoute isAuth={false} RouteComponent={FindID} />}
+          />
+
+          <Route
+            path="/okuser"
+            element={<PrivateRoute isAuth={false} RouteComponent={Okuser} />}
+          />
+
+          <Route
+            path="/findpass"
+            element={<PrivateRoute isAuth={false} RouteComponent={FindPass} />}
+          />
+
           {/* chat 추가 */}
           {/* <Route path="/chat/home" element={<ChatHome />} /> */}
           <Route
@@ -122,7 +162,7 @@ function App() {
         </Routes>
       )}
 
-      {showLayout && <Footer />}
+      {/* {showLayout && <Footer />} */}
     </div>
   );
 }
