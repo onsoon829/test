@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useState, useEffect } from "react";
 import {
   fetchCartList,
@@ -5,7 +6,6 @@ import {
   updateCartProductCount,
 } from "../../toolkit/actions/cart_action";
 import "./CartItem.css";
-
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 
@@ -13,7 +13,7 @@ const CartComponent = () => {
   const navigate = useNavigate();
   const { product_code } = useParams();
   const [cartItems, setCartItems] = useState([]);
-  const [isChecked, setIsChecked] = useState({});
+  const [checked, setChecked] = useState({});
   console.log("cartItems:", cartItems);
 
   useEffect(() => {
@@ -31,48 +31,46 @@ const CartComponent = () => {
           res.data.cartList.forEach((item) => {
             initialCheckState[item.cart_product_code] = false;
           });
-          setIsChecked(initialCheckState);
+          setChecked(initialCheckState);
         }
       })();
     }
   }, []);
 
-  //삭제 기능
-  const handleDelete = async (cartProductCode) => {
+  const handleCountChange = async (cartProductCode, newCount) => {
     try {
-      await fetchCartDelete(cartProductCode);
+      console.log(cartProductCode, newCount);
+      const res = await updateCartProductCount(cartProductCode, newCount);
+      // if (res.status === 200) {
+      //   const updatedCartItems = cartItems.map((item) =>
+      //     item.cart_product_code === cartProductCode
+      //       ? { ...item, cart_product_count: newCount }
+      //       : item
+      //   );
+      //   setCartItems(updatedCartItems);
+      // }
+    } catch (error) {
+      console.error("Error updating cart item count:", error);
+      alert("수량 업데이트에 실패했습니다."); // User-friendly error message
+    }
+  };
+
+  //삭제하기
+  const handleDelete = async (cart_product_code) => {
+    try {
+      await fetchCartDelete(cart_product_code); // fetchCartDelete 함수 호출
       const newData = cartItems.filter(
-        (item) => item.cart_product_code !== cartProductCode
-      );
-      setCartItems(newData);
-      const updatedCheckState = { ...isChecked };
-      delete updatedCheckState[cartProductCode];
-      setIsChecked(updatedCheckState);
+        (item) => item.cart_product_code !== cart_product_code
+      ); // 삭제된 아이템을 제외하고 새로운 데이터 생성
+      setCartItems(newData); // 새로운 데이터로 상태 업데이트
     } catch (error) {
       console.error("Error deleting cart item:", error);
     }
   };
 
-  //장바구니 수량 수정
-  const handleCountChange = async (cartProductCode, newCount) => {
-    try {
-      const res = await updateCartProductCount(cartProductCode, newCount);
-      if (res.status === 200) {
-        const updatedCartItems = [...cartItems];
-        const index = updatedCartItems.findIndex(
-          (item) => item.cart_product_code === cartProductCode
-        );
-        updatedCartItems[index].cart_product_count = newCount;
-        setCartItems(updatedCartItems);
-      }
-    } catch (error) {
-      console.error("Error updating cart item count:", error);
-    }
-  };
-
   //총상품가격
   const totalSum = cartItems.reduce((acc, item) => {
-    if (isChecked[item.cart_product_code]) {
+    if (checked[item.cart_product_code]) {
       const itemTotal = item.cart_product_count * item.product_price;
       return acc + itemTotal;
     }
@@ -81,7 +79,7 @@ const CartComponent = () => {
 
   //할인율
   const totalSale = cartItems.reduce((acc, item) => {
-    if (isChecked[item.cart_product_code]) {
+    if (checked[item.cart_product_code]) {
       const itemSale = (item.cart_product_count * item.product_price) / 10;
       return acc + itemSale;
     }
@@ -93,33 +91,34 @@ const CartComponent = () => {
     (state) => state.product.productImgDetail
   );
 
+  //선택한 상품 결제하기로 넘기기
   //결제하기로 넘어가기
   const onhandlepaybutton = () => {
     navigate(`/payment/${productDetail.product_code}`);
   };
 
   const handleCheckChange = (cartProductCode) => {
-    setIsChecked({
-      ...isChecked,
-      [cartProductCode]: !isChecked[cartProductCode],
+    setChecked({
+      ...checked,
+      [cartProductCode]: !checked[cartProductCode],
     });
   };
 
-  const handleCountIncrement = (cartProductCode) => {
+  const handleCountIncrement = async (cartProductCode) => {
     const updatedCartItems = [...cartItems];
     const index = updatedCartItems.findIndex(
       (item) => item.cart_product_code === cartProductCode
     );
     updatedCartItems[index].cart_product_count++;
     setCartItems(updatedCartItems);
-    handleCountChange(
+    await handleCountChange(
       cartProductCode,
       updatedCartItems[index].cart_product_count
     );
   };
 
   //수량 변경
-  const handleCountDecrement = (cartProductCode) => {
+  const handleCountDecrement = async (cartProductCode) => {
     const updatedCartItems = [...cartItems];
     const index = updatedCartItems.findIndex(
       (item) => item.cart_product_code === cartProductCode
@@ -127,7 +126,7 @@ const CartComponent = () => {
     if (updatedCartItems[index].cart_product_count > 1) {
       updatedCartItems[index].cart_product_count--;
       setCartItems(updatedCartItems);
-      handleCountChange(
+      await handleCountChange(
         cartProductCode,
         updatedCartItems[index].cart_product_count
       );
@@ -136,47 +135,57 @@ const CartComponent = () => {
 
   return (
     <div className="cart_container">
-      <h2>장바구니</h2>
+      <h2 className="horizenline2">장바구니</h2>
+      <div className="horizenline" />
       <div>
         {cartItems && cartItems.length > 0 ? (
           cartItems.map((item) => (
             <div key={item.cart_product_code} className="cart_item">
-              <p>이름: {item.product_name}</p>
-              <p>가격: {item.product_price}원</p>
-              <div className="quantity_control">
-                <button
-                  onClick={() => handleCountDecrement(item.cart_product_code)}
-                >
-                  -
-                </button>
-                <span>{item.cart_product_count}</span>
-                <button
-                  onClick={() => handleCountIncrement(item.cart_product_code)}
-                >
-                  +
-                </button>
-              </div>
               <input
                 type="checkbox"
-                id={item.cart_product_code}
-                className="checkbox-input"
-                checked={isChecked[item.cart_product_code] || false}
+                className="checkbox-custom"
+                checked={checked[item.cart_product_code] || false}
                 onChange={() => handleCheckChange(item.cart_product_code)}
               />
-              <label
-                htmlFor={item.cart_product_code}
-                className="checkbox-label"
-              >
-                <span
-                  className={`checkbox-custom ${
-                    isChecked[item.cart_product_code] ? "checkbox-checked" : ""
-                  }`}
-                ></span>
-              </label>
-              <div>
-                <button onClick={() => handleDelete(item.cart_product_code)}>
-                  삭제
-                </button>
+              <img
+                src={`./shopimg/${item.product_img0}`} // 이미지 추가
+                alt={item.product_name}
+                style={{
+                  width: "150px",
+                  height: "150px",
+                }}
+              />
+              <div className="product_details">
+                <div className="font2">
+                  <p>이름: {item.product_name}</p>
+                  <p>가격: {item.product_price}원</p>
+                </div>
+                <div className="product_amount_b">
+                  <div
+                    className="amount_bm"
+                    onClick={() => handleCountDecrement(item.cart_product_code)}
+                    disabled={item.cart_product_count <= 1}
+                  >
+                    -
+                  </div>
+                  <span>{item.cart_product_count}</span>
+                  <div
+                    className="amount_ba"
+                    onClick={() => handleCountIncrement(item.cart_product_code)}
+                  >
+                    +
+                  </div>
+                </div>
+
+                <label
+                  htmlFor={item.cart_product_code}
+                  className="checkbox-label"
+                ></label>
+                <div>
+                  <button onClick={() => handleDelete(item.cart_product_code)}>
+                    삭제
+                  </button>
+                </div>
               </div>
             </div>
           ))
@@ -188,12 +197,16 @@ const CartComponent = () => {
         <div className="font">
           <p>주문예상가격</p>
         </div>
-        <p>총상품가격: {totalSum}원</p>
-        <p>총 할인: {totalSale}원</p>
-        <p>총금액: {totalSum - totalSale}원</p>
-        <button className="button:hover" onClick={onhandlepaybutton}>
-          결제하기
-        </button>
+        <div className="menu_btn">
+          <p>총상품가격: {totalSum}원</p>
+          <p>총 할인: {totalSale}원</p>
+          <p>총금액: {totalSum - totalSale}원</p>
+        </div>
+        <div className="menu_btn">
+          <button className="button:hover" onClick={onhandlepaybutton}>
+            결제하기
+          </button>
+        </div>
       </div>
     </div>
   );
