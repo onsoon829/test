@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Login.css";
 
-const Login = () => {
+const Loginshop = () => {
   const [inputs, setInputs] = useState({
     user_idemail: "",
     user_password: "",
@@ -53,7 +53,7 @@ const Login = () => {
         localStorage.setItem("user_nickname", response.data.user_nickname);
 
         setInputs({ user_idemail: "", user_password: "" });
-        window.location.replace("/chat/home");
+        window.location.replace("/shophome");
         alert(localStorage.getItem("user_name") + "님 안녕하세요.");
       })
       .catch((error) => console.log(error));
@@ -108,4 +108,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Loginshop;

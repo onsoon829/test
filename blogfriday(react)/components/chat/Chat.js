@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./Chat.css";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { chatActions } from "../../toolkit/actions/chat_Action";
+import axios from "axios";
 
 function Chat() {
   const [webSocket, setWebSocket] = useState(null);
@@ -10,16 +11,43 @@ function Chat() {
   const [inputMessage, setInputMessage] = useState("");
   const [userId, setUserId] = useState("CCC");
 
-  const [recipientId, setRecipientId] = useState("");
-  const [view, setView] = useState(0); // 추가: 화면 상태 (0: 친구 목록, 1: 채팅)
+  // view 0,1 사용및 사용시 택한 유저 저장
+  const [view, setView] = useState(0); // (0: 친구 목록, 1: 채팅)
+  const [recipientId, setRecipientId] = useState(""); //id
+  const [recipientProfile, setRecipientProfile] = useState(""); //프로필
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  //sql timestamp형식과 호환이 잘안되어서 String으로 타입변환후 정해진 시간 형식에 맞게 재조정
+  const timestamp = formatMySQLDateTime();
+  function formatMySQLDateTime() {
+    const now = new Date();
+    return (
+      now.getFullYear() +
+      "-" +
+      ("0" + (now.getMonth() + 1)).slice(-2) +
+      "-" +
+      ("0" + now.getDate()).slice(-2) +
+      " " +
+      ("0" + now.getHours()).slice(-2) +
+      ":" +
+      ("0" + now.getMinutes()).slice(-2) +
+      ":" +
+      ("0" + now.getSeconds()).slice(-2)
+    );
+  }
+
   const connect = () => {
     if (!webSocket || webSocket.readyState === WebSocket.CLOSED) {
+      // const ws = new WebSocket(
+      //   `ws://localhost:8090/ws/chat?userId=${localStorage.getItem(
+      //     "user_code"
+      //   )}`
+      // );
+
       const ws = new WebSocket(
-        `ws://localhost:8090/ws/chat?userId=${localStorage.getItem(
+        `ws://112.169.231.62:8090/ws/chat?userId=${localStorage.getItem(
           "user_code"
         )}`
       );
@@ -48,6 +76,7 @@ function Chat() {
         sender_id: localStorage.getItem("user_code"),
         message: inputMessage,
         recipient_id: recipientId,
+        timestamp: timestamp,
       };
       webSocket.send(JSON.stringify(messageData));
       setMessages((prevMessages) => [...prevMessages, messageData]);
@@ -77,7 +106,13 @@ function Chat() {
   };
 
   const naviset = () => {
-    navigate("/chat/set");
+    if (window.confirm("로그아웃 하시겠습니까?")) {
+      navigate("/chat/set");
+    }
+  };
+
+  const navishop = () => {
+    navigate("/shophome");
   };
 
   useEffect(() => {
@@ -92,7 +127,7 @@ function Chat() {
   const [selectedMessage, setSelectedMessage] = useState(null);
   // 메시지 클릭 시 동작할 핸들러
   const handleMsgClick = (msg, event) => {
-    event.stopPropagation(); // 상위로 이벤트 전파 방지
+    event.stopPropagation(); // 상위로 이벤트 간섭 방지
     const x = event.clientX;
     const y = event.clientY;
 
@@ -130,7 +165,7 @@ function Chat() {
       (friend) => friend.user_code === recipientId
     );
     if (friend) {
-      setRecipientName(friend.user_name);
+      setRecipientName(friend.user_nickname);
     }
   };
 
@@ -152,23 +187,86 @@ function Chat() {
     return relevantMessages[relevantMessages.length - 1]; // 가장 최근 메시지 반환
   };
 
+  // 메세지 삭제
+  const deleteMessage = (timestamp) => {
+    if (selectedMessage) {
+      axios.delete(`/api/chat/deletemessage/${timestamp}`);
+      //재배치
+      setMessages((prevMessages) =>
+        prevMessages.filter((msg) => msg.timestamp !== timestamp)
+      );
+    }
+  };
+
+  // 최근 메세지 대로 정렬
+  // 들어온 map을 메세지 시간을 기준으로 재배열후 body에서 참조
+
+  const [sortedFriendList, setSortedFriendList] = useState([]);
+  useEffect(() => {
+    if (friendList.length && messages.length) {
+      const friendsWithLastMessage = friendList.map((friend) => {
+        const lastMessage = findLastMessage(friend.user_code);
+        return {
+          ...friend,
+          lastMessageTime: lastMessage
+            ? new Date(lastMessage.timestamp).getTime()
+            : 0,
+        };
+      });
+
+      const sortedFriends = friendsWithLastMessage.sort(
+        (a, b) => b.lastMessageTime - a.lastMessageTime
+      );
+
+      setSortedFriendList(sortedFriends); // 정렬된 목록을 상태로 저장
+    }
+  }, [messages, friendList]);
+
+  const adminMessage = () => {
+    if (
+      webSocket &&
+      webSocket.readyState === WebSocket.OPEN &&
+      inputMessage.trim()
+    ) {
+      const messageData = {
+        sender_id: localStorage.getItem("user_code"), // or a specific admin code
+        message: inputMessage,
+        recipient_id: "ALL", // 사용자가 'ALL'로 설정하여 서버 측에서 이를 인식하게 합니다.
+        timestamp: new Date().toISOString(),
+      };
+      webSocket.send(JSON.stringify(messageData));
+      setInputMessage(""); // 입력 필드 초기화
+    }
+  };
+
+  // 대화방 나가면
+  useEffect(() => {
+    setInputMessage(""); // 대화내용초기화
+  }, [view]);
+
   return (
     <>
       {view === 0 && (
         <div className="chat">
-          <div className="chat_menubar">
-            <div className="blank0"></div>
-            <div className="chat_menubar_button_f" onClick={navihome}></div>
-            <div className="chat_menubar_button_c_c"></div>
-            <div className="chat_menubar_button_d" onClick={navidot}></div>
-            <div className="chat_menubar_button_s" onClick={naviset}></div>
-          </div>
           <div className="chat_body">
-            <div className="chat_header">채팅</div>
+            <div className="chat_banner"></div>
+            <div className="chat_header_box">
+              <div className="chat_header_tag">채팅</div>
+            </div>
             <div>
               <div className="chat_friendlist">
-                {friendList &&
-                  friendList.map((chat) => {
+                {localStorage.getItem("user_code") === "A00000" ? (
+                  <div className="chat_friendbox" onClick={() => setView(2)}>
+                    <img
+                      className="chat_profileimg"
+                      src={"/basicicon/setwhite.png"}
+                      alt="비어있음"
+                    ></img>
+                    <div className="chat_name">전체 공지방</div>
+                  </div>
+                ) : null}
+                {sortedFriendList &&
+                  sortedFriendList.map((chat) => {
                     const lastMessage = findLastMessage(chat.user_code); // 각 친구의 최근 메시지 검색
                     return (
                       <div
@@ -182,11 +280,30 @@ function Chat() {
                             connect(); // Reconnect if disconnected
                           }
                           setRecipientId(chat.user_code);
+                          setRecipientProfile(chat.user_profile);
                           setView(1);
                         }}
                       >
-                        <div className="chat_profileimg"></div>
-                        <div className="chat_name">{chat.user_name}</div>
+                        <img
+                          className="chat_profileimg"
+                          src={
+                            chat.user_code === "A10000"
+                              ? localStorage.getItem("user_profile") !== "null"
+                                ? `/profileimages/${localStorage.getItem(
+                                    "user_profile"
+                                  )}`
+                                : "/basicicon/no-profile.png"
+                              : chat.user_profile
+                              ? `/profileimages/${chat.user_profile}`
+                              : "/basicicon/no-profile.png"
+                          }
+                          alt="비어있음"
+                        ></img>
+                        <div className="chat_name">
+                          {chat.user_code === "A10000"
+                            ? localStorage.getItem("user_nickname")
+                            : chat.user_nickname}
+                        </div>
                         <div className="chat_last_message">
                           {lastMessage ? lastMessage.message : ""}
                         </div>
@@ -196,19 +313,24 @@ function Chat() {
               </div>
             </div>
           </div>
+          <div className="chat_menubar">
+            <div className="chat_menubar_button_f" onClick={navihome}></div>
+            <div className="chat_menubar_button_c_c"></div>
+
+            <div className="chat_menubar_button_shop" onClick={navishop}></div>
+            <div className="chat_menubar_button_d" onClick={navidot}></div>
+            <div className="chat_menubar_button_s" onClick={naviset}></div>
+          </div>
         </div>
       )}
-      <div className="chat">
-        {view === 1 && (
+
+      {view === 1 && (
+        <div className="chat_o">
+          <div className="chat_header1">
+            <div className="chat_view0_btn" onClick={() => setView(0)}></div>
+            <div className="chat_view0_username">{recipientName}</div>
+          </div>
           <div className="chat_talkbox">
-            <div>{recipientName}</div>
-            <button
-              onClick={() => {
-                setView(0);
-              }}
-            >
-              뒤로
-            </button>
             <ul>
               {messages
                 .filter(
@@ -218,59 +340,125 @@ function Chat() {
                     (msg.sender_id === recipientId &&
                       msg.recipient_id === localStorage.getItem("user_code"))
                 )
-                .map((msg, index) => (
-                  <li
-                    key={index}
-                    className={`message ${
-                      msg.sender_id === localStorage.getItem("user_code")
-                        ? "my-message"
-                        : "other-message"
-                    }`}
-                    onClick={(e) => handleMsgClick(msg, e)}
-                  >
-                    {msg.sender_id === localStorage.getItem("user_code")
-                      ? ""
-                      : `${recipientName}: `}
-                    {msg.message}
-                  </li>
-                ))}
+                .map((msg, index, array) => {
+                  const previousMsg = array[index - 1];
+                  const isFirstMessageOfSender =
+                    !previousMsg || previousMsg.sender_id !== msg.sender_id;
+                  const imageClass = isFirstMessageOfSender
+                    ? "chat0_profileimg"
+                    : "chat1_profileimg";
+
+                  return (
+                    <li key={index} className="message_boxmi">
+                      {msg.sender_id !== localStorage.getItem("user_code") && (
+                        <img
+                          className={imageClass}
+                          src={
+                            isFirstMessageOfSender
+                              ? recipientProfile
+                                ? `/profileimages/${recipientProfile}`
+                                : "/basicicon/no-profile.png"
+                              : "/basicicon/empty-profile.png"
+                          }
+                          alt="프로필 이미지"
+                        />
+                      )}
+                      <div
+                        className={`message ${
+                          msg.sender_id === localStorage.getItem("user_code")
+                            ? "my-message"
+                            : "other-message"
+                        }`}
+                        onClick={(e) => handleMsgClick(msg, e)}
+                      >
+                        {msg.sender_id !== localStorage.getItem("user_code") &&
+                          `${recipientName}: `}
+                        {msg.message}
+                      </div>
+                    </li>
+                  );
+                })}
             </ul>
             <div style={hiddenDivStyle} className="optionsDiv">
-              {/* 선택된 메시지 정보를 사용하는 버튼 예시 */}
               {selectedMessage && (
-                <button
-                  onClick={() => {
-                    console.log(`작업 실행: ${selectedMessage.message}`);
-                    nlpsearch(selectedMessage.message);
-                  }}
-                >
-                  선택한 메세지: {selectedMessage.message}
-                </button>
+                <div className="clickinstance">
+                  <button onClick={() => nlpsearch(selectedMessage.message)}>
+                    위메프 검색: {selectedMessage.message}
+                  </button>
+                  <button
+                    onClick={() => deleteMessage(selectedMessage.timestamp)}
+                  >
+                    대화 삭제하기
+                  </button>
+                </div>
               )}
             </div>
-            <div className="chat_message">
-              <input
+          </div>
+          <div className="chat_message">
+            <div className="chat_input_message_ipt_box">
+              <div
+                contenteditable="true"
                 className="chat_input_message"
                 type="text"
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
+                // value={inputMessage}
+                // onChange={(e) => setInputMessage(e.target.value)}
+                onInput={(e) => setInputMessage(e.currentTarget.textContent)} // 'input' 이벤트 사용, 'textContent'로 값을 가져옴
                 onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+                // onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+                disabled={recipientId === "A00000"}
               />
-
-              <button
+            </div>
+            <div className="chat_input_message_btn_box">
+              <div
+                className="chat_input_message_btn"
                 onClick={sendMessage}
                 disabled={
                   !inputMessage.trim() ||
                   !localStorage.getItem("user_code").trim() ||
-                  !recipientId
+                  !recipientId ||
+                  recipientId === "A00000"
                 }
               >
-                Send
-              </button>
+                전송
+              </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+      {view === 2 && (
+        <div>
+          <div className="chat_o">
+            <div className="chat_header1">
+              <div className="chat_view0_btn" onClick={() => setView(0)}></div>
+              <div className="chat_view0_username">전체공지방</div>
+            </div>
+            <div className="chat_talkbox">
+              <ul></ul>
+            </div>
+          </div>
+          <div className="chat_message">
+            <div className="chat_input_message_ipt_box">
+              <input
+                className="chat_input_message"
+                type="text"
+                placeholder="Enter message to broadcast"
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && adminMessage()}
+              />
+            </div>
+            <div className="chat_input_message_btn_box">
+              <div
+                className="chat_input_message_btn"
+                onClick={adminMessage}
+                disabled={!inputMessage.trim()}
+              >
+                전송
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

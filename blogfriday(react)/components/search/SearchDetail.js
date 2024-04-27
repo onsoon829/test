@@ -19,10 +19,6 @@ const SearchDetail = () => {
     (state) => state.product.productImgDetail
   );
 
-  const onhandlebuybutton = () => {
-    navigate(`/payment/${productDetail.product_code}`);
-  };
-
   const onhandleblogbutton = () => {
     navigate("/blog");
   };
@@ -45,32 +41,20 @@ const SearchDetail = () => {
     },
   };
 
-  const gocartbutton = async () => {
-    console.log("add>>>>");
-    await axios
-      .post(
-        `/api/cart/add`,
-        {
-          product_code: product_code,
-          user_id: user_id,
-          cart_product_count: amount,
-        },
-        config
-      )
-      .then((response) => navigate(`/cart`))
-      .catch((error) => console.log(error));
-  };
-
-  // const handleButtonClick = () => {
-  //   navigate("Cart", {
-  //     state: {
-  //       cart_product_code: `${cart_product_code}`,
-  //       product_code: `${product_code}`,
-  //       cart_product_count: `${cart_product_count}`,
-  //       cart_product_price: `${cart_product_price}`,
-  //       cart_product_name: `${cart_product_name}`,
-  //     },
-  //   });
+  // const gocartbutton = async () => {
+  //   console.log("add>>>>");
+  //   await axios
+  //     .post(
+  //       `/api/cart/add`,
+  //       {
+  //         product_code: product_code,
+  //         user_id: user_id,
+  //         cart_product_count: amount,
+  //       },
+  //       config
+  //     )
+  //     .then((response) => navigate(`/cart`))
+  //     .catch((error) => console.log(error));
   // };
 
   useEffect(() => {
@@ -84,93 +68,146 @@ const SearchDetail = () => {
   const imagePath = `/shopimg/${productImgDetail.product_img0}`;
   const imagePath1 = `/shopimg/${productImgDetail.product_img1}`;
   console.log("경로", imagePath);
-  return (
-    <>
-      <h1 className="headline"></h1>
-      <div className="detailbody">
-        <div className="productbox">
-          <img
-            className="product_detail_img"
-            src={imagePath}
-            alt="product_img0"
-            width="300"
-            height="300"
-          />
 
-          <div className="product_context_box">
-            <div className="product_context_box_pname">
-              <div>{productDetail.product_name}</div>
+  //
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleOutsideClick = (e) => {
+    if (e.target.id === "modal-overlay") {
+      closeModal();
+    }
+  };
+  const onhandlebuybutton = () => {
+    navigate(`/payment/${productDetail.product_code}`);
+    closeModal();
+  };
+
+  const gocartbutton = async () => {
+    if (amount === 0) {
+      alert("상품 수량을 선택해 주세요");
+    } else {
+      try {
+        const config = {
+          headers: {
+            Authorization: localStorage.getItem("Authorization"),
+            "Authorization-refresh": localStorage.getItem(
+              "Authorization-refresh"
+            ),
+          },
+        };
+        await axios.post(
+          `/api/cart/add`,
+          {
+            product_code: product_code,
+            user_id: user_id,
+            cart_product_count: amount,
+          },
+          config
+        );
+        if (window.confirm("쇼핑을 계속 하시겠습니까?")) {
+        } else {
+          navigate(`/cart`);
+        }
+
+        closeModal();
+      } catch (error) {
+        console.error("Error adding to cart", error);
+      }
+    }
+  };
+
+  return (
+    <div className="detailbody">
+      <div className="productbox">
+        <img
+          className="product_detail_img"
+          src={imagePath}
+          alt="product_img0"
+          width="300"
+          height="300"
+        />
+      </div>
+      <div className="product_context_box">
+        <div className="product_context_box_pname">
+          {productDetail.product_name}
+        </div>
+        <div className="product_context_box_pcontext">
+          <div>{productDetail.product_content_text}</div>
+        </div>
+        <div className="product_context_box_pprice">
+          <div>
+            {productDetail.product_price}
+            <span className="product_context_box_pprice_s">원</span>
+          </div>
+          {/* <div className="product_amount_b">
+            <div className="amount_bm" onClick={amountDown}>
+              -
             </div>
-            <div className="product_context_box_pcontext">
-              <div>{productDetail.product_content_text}</div>
+            <div className="amount_ba">{amount}</div>
+            <div className="amount_bp" onClick={amountUp}>
+              +
             </div>
-            <div className="product_context_box_pprice">
-              <div>
-                {productDetail.product_price}
-                <span className="product_context_box_pprice_s">원</span>
+          </div> */}
+          {/* <div className="amount_cal">
+            총{productDetail.product_price * amount}원
+          </div> */}
+        </div>
+        {/* <div className="product_amount">
+          <button className="detail_go_buy" onClick={onhandlebuybutton}>
+            구매하기
+          </button>
+          <button className="detail_go_cart" onClick={gocartbutton}>
+            장바구니
+          </button>
+        </div> */}
+      </div>
+      <div className="productcontentbox">
+        <img
+          className="productcontentbox_i"
+          src={imagePath1}
+          alt="product_img1"
+          width="300"
+          height="300"
+        />
+      </div>
+      <div className="detail_hmenu">
+        <div className="detail_hmenu_btn" onClick={openModal}>
+          장바구니
+        </div>
+      </div>
+      {isModalOpen && (
+        <div
+          id="modal-overlay"
+          className="modal-overlay"
+          onClick={handleOutsideClick}
+        >
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <button onClick={closeModal} className="modal_close_button">
+              X
+            </button>
+            <div className="product_amount_b">
+              <div className="amount_bm" onClick={amountDown}>
+                -
+              </div>
+              <div className="amount_ba">{amount}</div>
+              <div className="amount_bp" onClick={amountUp}>
+                +
               </div>
             </div>
-            <div className="product_amount">
-              <div className="product_amount_b">
-                <div className="amount_bm" onClick={amountDown}>
-                  -
-                </div>
-                <div className="amount_ba">{amount}</div>
-                <div className="amount_bp" onClick={amountUp}>
-                  +
-                </div>
-              </div>
-              <div className="amount_cal">
-                총{productDetail.product_price * amount}원
-              </div>
+            <div>
+              <p>총 금액: {productDetail.product_price * amount}원</p>
+              <button onClick={onhandlebuybutton}>구매하기</button>
+              <button onClick={gocartbutton}>장바구니에 추가</button>
             </div>
           </div>
         </div>
-        <div className="productcontentbox">
-          <img
-            className="productcontentbox_i"
-            src={imagePath1}
-            alt="product_img1"
-            width="300"
-            height="300"
-          />
-        </div>
-      </div>
-      <div></div>
-      <div class="menu-bar">
-        {/* <!-- 메뉴바 내용 --> */}
-        <div class="dropdown-menu">
-          {/* <!-- 드롭다운 메뉴 --> */}
-          옵션 선택
-        </div>
-        <button class="buy" onClick={onhandlebuybutton}>
-          구매하기
-        </button>
-
-        <button class="cart" onClick={gocartbutton}>
-          장바구니
-        </button>
-
-        {/* <!-- 소셜 아이콘 --> */}
-        <div className="menu-bar-icorn">
-          <img
-            src="/images/Instagram_logo.png"
-            alt="Instagram"
-            className="social-icon"
-            width="100"
-            height="100"
-          />
-          <img
-            src="/images/blog.png"
-            alt="Blog"
-            class="social-icon"
-            width="100"
-            height="100"
-            onClick={onhandleblogbutton}
-          />
-        </div>
-      </div>
-    </>
+      )}
+    </div>
   );
 };
 

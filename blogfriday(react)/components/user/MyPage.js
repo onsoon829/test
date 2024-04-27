@@ -1,66 +1,57 @@
-import React, { useRef } from "react";
+import React from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import "./MyPage.css";
 
 const MyPage = () => {
-  const userInfoRef = useRef(null);
-  const editInfoRef = useRef(null);
-  const deleteUserRef = useRef(null);
+  const navigate = useNavigate();
 
-  const scrollToRef = (ref) => {
-    if (ref.current) {
-      const yOffset = -window.innerHeight / 2 + ref.current.clientHeight / 2; // 요소의 높이를 고려하여 조정
-      const yPosition =
-        ref.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-
-      window.scrollTo({
-        top: yPosition,
-        behavior: "smooth",
-      });
-    }
-  };
+  const user_id = localStorage.getItem("user_id");
 
   const changeState = async (e) => {
     e.preventDefault();
     await axios.put(`/user/updatestate/${localStorage.getItem("user_id")}`);
   };
 
+  const savemenunavi = (e) => {
+    navigate(`/seller/product/save/${user_id}`);
+  };
+
+  const listmenunavi = (e) => {
+    if (localStorage.getItem("user_state") === "2") {
+      navigate("/seller/product/list");
+    } else {
+      alert("판매허가가 필요합니다.");
+    }
+  };
+
+  const mypageuserinfo = (e) => {
+    navigate("/shopedininfo");
+  };
+
+  const mypageuseredit = (e) => {
+    alert(localStorage.getItem("user_name") + "님 정보를 수정하시겠습니까?");
+    navigate("/shopuseredit");
+  };
+
   return (
     <>
-      <div className="mypage_upper">
-        <div className="mypage_upperh">도움말</div>
-      </div>
-      <div className="mypage_body">
-        <div className="mypage_menu_box">
-          <div
-            className="mypage_menu_button"
-            onClick={() => scrollToRef(userInfoRef)}
-          >
-            내정보
-          </div>
-          <div
-            className="mypage_menu_button"
-            onClick={() => scrollToRef(editInfoRef)}
-          >
-            정보 수정
-          </div>
-          <div
-            className="mypage_menu_button"
-            onClick={() => scrollToRef(deleteUserRef)}
-          >
-            회원 탈퇴
+      <div className="seller_body">
+        <div className="seller_menu_box">
+          <div className="seller_menu_button_1">구매탭</div>
+          <div className="seller_menu_button" onClick={listmenunavi}>
+            판매탭
           </div>
         </div>
-        <div className="mypagebody">
-          <div className="mypage_myimg" ref={userInfoRef}>
-            <div className="mypage_underbox1">내정보 섹션</div>
+        <div className="seller_menu_box">
+          <div className="seller_menu_button_m" onClick={mypageuserinfo}>
+            내정보
           </div>
-          <div className="mypageinput2" ref={editInfoRef}>
-            <div className="mypage_underbox2">정보 수정 섹션</div>
+
+          <div className="seller_menu_button" onClick={mypageuseredit}>
+            내정보 수정
           </div>
-          <div className="mypageinput3" ref={deleteUserRef}>
-            <div className="mypage_underbox3">회원 탈퇴 섹션</div>
-          </div>
+          <div className="seller_menu_button">구매내역</div>
         </div>
       </div>
     </>

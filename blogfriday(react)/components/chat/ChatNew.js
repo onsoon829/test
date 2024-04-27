@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { chatActions } from "../../toolkit/actions/chat_Action";
 import "./Chat.css";
 
-function Chat() {
+function Chatnew() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [currentUserId2, setCurrentUserId2] = useState(null);
@@ -287,7 +287,4 @@ function Chat() {
   );
 }
 
-export default Chat;
-
-
-export default ChatNew;
+export default Chatnew;

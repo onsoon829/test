@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { productActions } from "../../toolkit/actions/product_action";
 import "./Search.css";
+import axios from "axios";
 
 const Search = () => {
   //기본 함수 선언
@@ -46,38 +47,37 @@ const Search = () => {
   //product_name, dispatch
   return (
     <div>
-      <div>
+      <div className="product_list_body">
         <div className="search_output">
           <span className="product_name_red">{product_name} </span> 검색결과
         </div>
         <div className="product_blank4"></div>
         <div className="product_map">
-          <div>
-            {productList &&
-              productList.map((product) => (
-                <div key={product.product_code} className="map_box">
-                  {productImages[product.product_code]?.product_img0 && (
-                    <img
-                      className="search_img"
-                      src={`/shopimg/${
-                        productImages[product.product_code].product_img0
-                      }`}
-                      alt={`${product.product_name}`}
-                      onClick={() => handleimgClick1(product.product_code)}
-                    />
-                  )}
-                  <div className="search_context"></div>
-                  <div className="search_text">
-                    <div className="search_text_name">
-                      {product.product_name}
-                    </div>
-                    <div className="search_text_price">
-                      {product.product_price}원
-                    </div>
+          {productList &&
+            productList.map((product) => (
+              <div
+                key={product.product_code}
+                className="map_box"
+                onClick={() => handleimgClick1(product.product_code)}
+              >
+                {productImages[product.product_code]?.product_img0 && (
+                  <img
+                    className="search_img"
+                    src={`/shopimg/${
+                      productImages[product.product_code].product_img0
+                    }`}
+                    alt={`${product.product_name}`}
+                  />
+                )}
+
+                <div className="search_text">
+                  <div className="search_text_name">{product.product_name}</div>
+                  <div className="search_text_price">
+                    {product.product_price}원
                   </div>
                 </div>
-              ))}
-          </div>
+              </div>
+            ))}
         </div>
       </div>
     </div>

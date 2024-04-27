@@ -96,6 +96,7 @@ const PaymentPage = () => {
             <div className="store-name">{productDetail.product_name}</div>
             <div className="order-info">
               <img
+                className=""
                 src={imagePath}
                 alt="product_img0"
                 width="300"
@@ -120,38 +121,43 @@ const PaymentPage = () => {
 
           <div className="order-menu">
             <h3>결제 수단 선택</h3>
-            <ul>
-              <li>
-                <div>
-                  <label>
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="creditCard"
-                      checked={paymentMethod === "creditCard"}
-                      onChange={handlePaymentMethodChange}
-                    />
-                    신용카드
-                  </label>
-                  <span className="menu-price"></span>
-                </div>
-              </li>
-              <li>
-                <div>
-                  <label>
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="bankTransfer"
-                      checked={paymentMethod === "bankTransfer"}
-                      onChange={handlePaymentMethodChange}
-                    />
-                    계좌이체
-                  </label>
-                  <span className="menu-price"></span>
-                </div>
-              </li>
-            </ul>
+            <div className="paymentMethod_box">
+              <div className="paymentMethod_boxi">
+                <img
+                  className="paymenticorn"
+                  src="/basicicon/card.png"
+                  alt="카드"
+                />
+                <input
+                  type="radio"
+                  className="inputsize"
+                  name="paymentMethod"
+                  value="creditCard"
+                  checked={paymentMethod === "creditCard"}
+                  onChange={handlePaymentMethodChange}
+                />
+                신용카드
+                <span className="menu-price"></span>
+              </div>
+
+              <div className="paymentMethod_boxi">
+                <img
+                  className="paymenticorn"
+                  src="/basicicon/cash.png"
+                  alt="카드"
+                />
+                <input
+                  type="radio"
+                  className="inputsize"
+                  name="paymentMethod"
+                  value="bankTransfer"
+                  checked={paymentMethod === "bankTransfer"}
+                  onChange={handlePaymentMethodChange}
+                />
+                계좌이체
+                <span className="menu-price"></span>
+              </div>
+            </div>
           </div>
 
           {/* <div className="price">
@@ -173,7 +179,7 @@ const PaymentPage = () => {
             onClick={submitOrder}
             disabled={!paymentMethod}
           >
-            {productDetail.product_price}원 결제하기
+            {productDetail.product_price * orderInfo.quantity}원 결제하기
           </button>
         </div>
       </main>

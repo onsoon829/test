@@ -41,7 +41,7 @@
 /* 결제 박스 스타일 */
 .checkout-box {
   position: fixed; /* 박스를 화면 위에 고정합니다. */
-  top: 70%;
+  bottom: -3%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 750px; /* 박스 너비를 설정합니다. */
@@ -118,7 +118,7 @@
 }
 
 .font {
-  font-size: 30px;
+  font-size: 25px;
   font-style: italic;
   margin-bottom: 10px;
 }
@@ -186,11 +186,16 @@ imgposition {
   cursor: pointer; /* 마우스 오버 시 커서 변경 */
 }
 
-.menu_btn {
-  all: unset;
-  width: 25%;
+.TextBox {
   text-align: center;
-  cursor: pointer;
-  width: 100px;
+  font-size: 18px;
+  line-height: 1.5;
+  transform: translate(-5%, -70%);
+}
+
+.menu_btn {
+  width: 50%;
   height: 100px;
+  transform: translate(150%, -180%);
+  margin: left;
 }

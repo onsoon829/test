@@ -55,11 +55,17 @@ const Chatdot = () => {
   };
 
   const naviset = () => {
-    navigate("/chat/set");
+    if (window.confirm("로그아웃 하시겠습니까?")) {
+      navigate("/chat/set");
+    }
   };
 
   const goToEditInfo = () => {
     navigate("/editinfo");
+  };
+
+  const navishop = () => {
+    navigate("/shophome");
   };
 
   const handleWithdrawal = async () => {
@@ -79,20 +85,14 @@ const Chatdot = () => {
 
   return (
     <div className="chat">
-      <div className="chat_menubar">
-        <div className="blank0"></div>
-        <div className="chat_menubar_button_f" onClick={navihome}></div>
-        <div className="chat_menubar_button_c" onClick={navichat}></div>
-        <div className="chat_menubar_button_d_c"></div>
-        <div className="chat_menubar_button_s" onClick={naviset}></div>
-      </div>
-
       <div className="chat_body">
+        <div className="chat_header_box">
+          <div className="chatdot_header_tag">
+            {localStorage.user_name}님의 정보
+          </div>
+        </div>
         <div>
-          <div className="chat_header"></div>
-
           <div className="chatdot-form-container">
-            <h1>{localStorage.user_name}님의 정보</h1>
             <div className="form-group mb-1">
               <img
                 src={
@@ -104,64 +104,74 @@ const Chatdot = () => {
                 className="profile-image"
               />
             </div>
-            <div className="chatdot-form-group mb-1">
-              <label>이메일</label>
+            <div className="chatdot-form-group">
+              <div className="chatdot_label">이메일</div>
               <input
                 type="email"
-                className="form-control"
+                className="chatdot_form-control"
                 value={user_idemail}
                 readOnly
               />
             </div>
-            <div className="chatdot-form-group mb-1">
-              <label>이름</label>
+            <div className="chatdot-form-group">
+              <div className="chatdot_label">이름</div>
               <input
                 type="text"
-                className="form-control"
+                className="chatdot_form-control"
                 value={user_name}
                 readOnly
               />
             </div>
-            <div className="chatdot-form-group mb-1">
-              <label>연락처</label>
+            <div className="chatdot-form-group">
+              <div className="chatdot_label">연락처</div>
               <input
                 type="text"
-                className="form-control"
+                className="chatdot_form-control"
                 value={user_phonenumber}
                 readOnly
               />
             </div>
-            <div className="chatdot-form-group mb-1">
-              <label>닉네임</label>
+            <div className="chatdot-form-group">
+              <div className="chatdot_label">닉네임</div>
               <input
                 type="text"
-                className="form-control"
+                className="chatdot_form-control"
                 value={user_nickname}
                 readOnly
               />
             </div>
-            <div className="chatdot-form-group mb-1">
-              <label>친구추가 코드</label>
+            <div className="chatdot-form-group">
+              <div className="chatdot_label">친구추가 코드</div>
               <input
                 type="text"
-                className="form-control"
+                className="chatdot_form-control"
                 value={user_code}
                 readOnly
               />
             </div>
-            <button className="chatdot-btn btn-primary" onClick={goToEditInfo}>
-              회원정보 수정하기
-            </button>
+            <div className="chatdot-btn-btn-box">
+              <button className="chatdot-btn-btn" onClick={goToEditInfo}>
+                회원정보 수정하기
+              </button>
 
-            <button
-              type="button"
-              className="btn btn-danger mt-2"
-              onClick={handleWithdrawal}
-            >
-              회원 탈퇴하기
-            </button>
+              <button
+                type="button"
+                className="chatdot-btn-removebtn"
+                onClick={handleWithdrawal}
+              >
+                회원 탈퇴하기
+              </button>
+            </div>
           </div>
         </div>
+      </div>
+      <div className="chat_menubar">
+        <div className="chat_menubar_button_f" onClick={navihome}></div>
+        <div className="chat_menubar_button_c" onClick={navichat}></div>
+
+        <div className="chat_menubar_button_shop" onClick={navishop}></div>
+        <div className="chat_menubar_button_d_c"></div>
+        <div className="chat_menubar_button_s" onClick={naviset}></div>
       </div>
     </div>
   );

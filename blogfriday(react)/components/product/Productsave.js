@@ -7,7 +7,6 @@ import "./Productsave.css";
 const Porductsave = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
   const [product, setProduct] = useState({
     category_code: "",
     product_name: "",
@@ -18,7 +17,7 @@ const Porductsave = () => {
     secondFile: null,
   });
 
-  const user_id = 1;
+  const user_id = localStorage.getItem("user_id");
 
   const {
     category_code,
@@ -44,10 +43,22 @@ const Porductsave = () => {
     navigate("/seller/product/list");
   };
 
+  const mypagemenunavi = (e) => {
+    navigate(`/mypage`);
+  };
+
   const handleFileChange = (e) => {
     setProduct((prev) => {
       return { ...prev, [e.target.name]: e.target.files[0] };
     });
+  };
+
+  const config = {
+    headers: {
+      "Content-Type": "multipart/form-data", // 프로필 이미지 전송시에는 multipart/form-data로 설정
+      Authorization: localStorage.getItem("Authorization"),
+      "Authorization-refresh": localStorage.getItem("Authorization-refresh"),
+    },
   };
 
   const onSubmit = async (e) => {
@@ -64,7 +75,7 @@ const Porductsave = () => {
     formData.append("secondFile", secondFile);
 
     try {
-      await dispatch(productActions.getProductWrite(formData));
+      await dispatch(productActions.getProductWrite(formData, config));
       alert("action 전송 성공.");
     } catch (error) {
       console.error("action 전송 실패", error);
@@ -82,21 +93,25 @@ const Porductsave = () => {
   };
 
   //카테고리 관련
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const handleCategoryClick = (category) => {
-    setSelectedCategory(category); // Set the currently selected category
-    setProduct({ ...product, category_code: category });
+  // const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategoryName, setSelectedCategoryName] = useState("");
+  const handleCategoryClick = (category, number) => {
+    setSelectedCategoryName(category);
+    setProduct({ ...product, category_code: number.toString() });
   };
 
   return (
     <>
-      <div className="savelist_upper">
-        <div className="savelist_upperh">도움말</div>
-      </div>
       <div className="seller_body">
         <div className="seller_menu_box">
+          <div className="seller_menu_button" onClick={mypagemenunavi}>
+            구매탭
+          </div>
+          <div className="seller_menu_button_2">판매탭</div>
+        </div>
+        <div className="seller_menu_box">
           <div className="seller_menu_button" onClick={listmenunavi}>
-            물품 리스트
+            판매 물품 리스트
           </div>
           <div className="seller_menu_button_c" onClick={savemenunavi}>
             물품 등록
@@ -106,27 +121,31 @@ const Porductsave = () => {
         <div className="save">
           <div className="saveinput">
             <div className="category_box">
-              {["패션", "식품", "가전제품", "가구", "뷰티", "기타"].map(
+              {["패션", "식품", "가전제품", "악세서리", "가구", "기타"].map(
                 (category, index) => (
                   <button
                     key={index}
-                    className={selectedCategory === category ? "active" : ""}
-                    onClick={() => handleCategoryClick(category)}
+                    className={
+                      selectedCategoryName === category ? "active" : ""
+                    }
+                    onClick={() => handleCategoryClick(category, index + 1)}
                   >
                     {category}
                   </button>
                 )
               )}
             </div>
-            <form onSubmit={onSubmit}>
+            <form onSubmit={onSubmit} className="save_form_box">
               <div className="savecontextinputbox">
                 <div className="save_inputbody">
                   <div className="save_t">
-                    <div>category_code</div>
-                    <div>product_name</div>
-                    <div>product_price</div>
-                    <div>product_count</div>
-                    <div>product_text</div>
+                    <div className="save_input_text">상품 카테고리</div>
+                    <div className="save_input_text">상품명</div>
+                    <div className="save_input_text">상품 가격</div>
+                    <div className="save_input_text">상품 수량</div>
+                    <div className="save_input_text">상품 설명</div>
+                    {/* <div className="save_input_text">상품 이미지</div>
+                    <div className="save_input_text">상품 상세 설명 이미지</div> */}
                   </div>
 
                   <div className="save_inputbox">
@@ -134,7 +153,8 @@ const Porductsave = () => {
                       className="save_inputbox_input"
                       type="text"
                       name="category_code"
-                      onChange={handleValueChange}
+                      value={selectedCategoryName}
+                      readOnly
                     ></input>
                     <input
                       className="save_inputbox_input"
@@ -162,33 +182,32 @@ const Porductsave = () => {
                     ></input>
                   </div>
                 </div>
-                <div className="save_inputimg">
-                  <div className="save_inputimg_c">
-                    <div>물품이미지</div>
-                    <div>상품 상세 설명 이미지</div>
-                  </div>
-                  <div className="save_inputimg_d">
-                    <div>
-                      <input
-                        type="file"
-                        name="filename"
-                        id="filepath"
-                        onChange={handleFileChange}
-                      />
-                    </div>
-                    <div>
-                      <input
-                        type="file"
-                        name="secondFile"
-                        onChange={handleFileChange}
-                      />
-                    </div>
-                  </div>
-                </div>
               </div>
-              <button type="submit" className="savesubmit_btn">
-                등록완료
-              </button>
+              <div className="save_inputimg">
+                {/* <div className="save_inputimg_c">
+                    <div className="save_input_text">상품 이미지</div>
+                    <div className="save_input_text">상품 상세 설명 이미지</div>
+                  </div> */}
+                <div className="save_inputimg_d">
+                  <input
+                    className="save_file"
+                    type="file"
+                    name="filename"
+                    id="filepath"
+                    onChange={handleFileChange}
+                  />
+
+                  <input
+                    className="save_file"
+                    type="file"
+                    name="secondFile"
+                    onChange={handleFileChange}
+                  />
+                </div>
+                <button type="submit" className="savesubmit_btn">
+                  등록완료
+                </button>
+              </div>
             </form>
           </div>
           <div className="savepreview">

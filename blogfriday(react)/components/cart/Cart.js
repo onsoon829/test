@@ -14,6 +14,8 @@ const CartComponent = () => {
   const { product_code } = useParams();
   const [cartItems, setCartItems] = useState([]);
   const [checked, setChecked] = useState({});
+  const [selectAll, setSelectAll] = useState(false); // 전체 선택 상태를 관리하는 상태 추가
+
   console.log("cartItems:", cartItems);
 
   useEffect(() => {
@@ -25,13 +27,17 @@ const CartComponent = () => {
     } else {
       (async () => {
         const res = await fetchCartList(user_id);
-        if (res.status === 200) {
+        if (res && res.status === 200) {
           setCartItems(res.data.cartList);
           const initialCheckState = {};
           res.data.cartList.forEach((item) => {
             initialCheckState[item.cart_product_code] = false;
           });
           setChecked(initialCheckState);
+        } else {
+          // 장바구니가 비어있는 경우에 대한 처리
+          console.log("장바구니가 비어있습니다.");
+          // 또는 다른 처리를 추가할 수 있습니다.
         }
       })();
     }
@@ -68,6 +74,39 @@ const CartComponent = () => {
     }
   };
 
+  //전체삭제
+  const handleAllDelete = async () => {
+    const selectedProducts = Object.keys(checked).filter(
+      (cartProductCode) => checked[cartProductCode]
+    );
+
+    try {
+      // 선택된 각 상품을 순회하면서 비동기적으로 삭제합니다.
+      for (const cartProductCode of selectedProducts) {
+        await fetchCartDelete(cartProductCode);
+        // 각 상품 삭제 후 상태 업데이트
+        setCartItems((prevItems) =>
+          prevItems.filter((item) => item.cart_product_code !== cartProductCode)
+        );
+      }
+
+      // 전체 삭제 후에 페이지를 새로고침합니다.
+      window.location.replace("/cart");
+    } catch (error) {
+      console.error("Error deleting selected cart items:", error);
+    }
+  };
+
+  //전체 선택
+  const handleSelectAllToggle = () => {
+    setSelectAll(!selectAll); // 전체 선택 상태를 토글합니다.
+    const updatedCheckedState = {}; // 업데이트할 체크 상태를 담을 객체 생성
+    cartItems.forEach((item) => {
+      updatedCheckedState[item.cart_product_code] = !selectAll; // 모든 상품의 체크 상태를 전체 선택 상태와 동일하게 설정합니다.
+    });
+    setChecked(updatedCheckedState); // 변경된 체크 상태를 적용합니다.
+  };
+
   //총상품가격
   const totalSum = cartItems.reduce((acc, item) => {
     if (checked[item.cart_product_code]) {
@@ -77,7 +116,7 @@ const CartComponent = () => {
     return acc;
   }, 0);
 
-  //할인율
+  //총할인
   const totalSale = cartItems.reduce((acc, item) => {
     if (checked[item.cart_product_code]) {
       const itemSale = (item.cart_product_count * item.product_price) / 10;
@@ -86,14 +125,18 @@ const CartComponent = () => {
     return acc;
   }, 0);
 
+  //상품정보, 상품 이미지 정보 가져오기
   const productDetail = useSelector((state) => state.product.productDetail);
   const productImgDetail = useSelector(
     (state) => state.product.productImgDetail
   );
 
-  //선택한 상품 결제하기로 넘기기
-  //결제하기로 넘어가기
   const onhandlepaybutton = () => {
+    // 장바구니에 선택된 상품이 없을 경우 경고 메시지를 표시하고 결제 페이지로 이동하지 않음
+    if (Object.values(checked).every((value) => !value)) {
+      alert("상품을 선택해주세요.");
+      return;
+    }
     navigate(`/payment/${productDetail.product_code}`);
   };
 
@@ -117,7 +160,6 @@ const CartComponent = () => {
     );
   };
 
-  //수량 변경
   const handleCountDecrement = async (cartProductCode) => {
     const updatedCartItems = [...cartItems];
     const index = updatedCartItems.findIndex(
@@ -137,6 +179,9 @@ const CartComponent = () => {
     <div className="cart_container">
       <h2 className="horizenline2">장바구니</h2>
       <div className="horizenline" />
+      <button onClick={handleSelectAllToggle}>전체 선택</button>{" "}
+      <button onClick={handleAllDelete}>선택 삭제</button>
+      {/* 전체 선택 버튼 추가 */}
       <div>
         {cartItems && cartItems.length > 0 ? (
           cartItems.map((item) => (
@@ -197,7 +242,7 @@ const CartComponent = () => {
         <div className="font">
           <p>주문예상가격</p>
         </div>
-        <div className="menu_btn">
+        <div className="TextBox">
           <p>총상품가격: {totalSum}원</p>
           <p>총 할인: {totalSale}원</p>
           <p>총금액: {totalSum - totalSale}원</p>

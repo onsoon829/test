@@ -44,12 +44,12 @@ const Header = () => {
     navigate("/seller/product/list");
   };
 
-  const naviChat = () => {
-    navigate("/chat/home");
-  };
-
   const handleLoginClick = () => {
     navigate("/");
+  };
+
+  const naviChat = () => {
+    navigate("/chat/home");
   };
 
   const handleLogoutClick = () => {
@@ -70,27 +70,31 @@ const Header = () => {
 
   return (
     <div className="header">
-      <div className="header-box">
-        <div className="blank0"></div>
-        <a href="/shophome">
-          <div className="logo" onClick={handlelogoClick} />
-        </a>
-        <div className="blank1"></div>
-        <div className="topmid">
+      <div className="header_log_box">
+        <div className="logo" onClick={handlelogoClick} />
+        <div className="logo_text">blogfirday</div>
+        <div className="gotoapp">앱으로 이동</div>
+      </div>
+
+      <div className="topmid">
+        <div className="logo_name">BFDAY</div>
+
+        <div className="search_input_box">
+          <div className="search-button"></div>
           <input
+            className="seach-input"
             type="text"
-            className="search-input"
             onChange={handleInputChange}
+            placeholder="물품을 검색하세요"
             onKeyPress={handleKeyPress}
           />
-          <div className="search-button" onClick={handleSearchClick}></div>
         </div>
-
+        <div className="gotochat" onClick={naviChat}></div>
+      </div>
+      {/* <div className="header-box">
         {isLoggedIn ? (
           <>
-            {/* <button className="myPage" onClick={naviChat}>
-              채팅
-            </button> */}
+            
             <div className="productsave" onClick={handleLogoutClick}>
               로그아웃
             </div>
@@ -113,7 +117,20 @@ const Header = () => {
         )}
         <div className="blank3"></div>
       </div>
-      <div className="header_categorybar">
+      <a href="/shophome">
+        <div className="logo" onClick={handlelogoClick} />
+      </a>
+      <div className="blank1"></div>
+      <div className="topmid">
+        <input
+          type="text"
+          className="search-input"
+          onChange={handleInputChange}
+          onKeyPress={handleKeyPress}
+        />
+        <div className="search-button" onClick={handleSearchClick}></div>
+      </div> */}
+      {/* <div className="header_categorybar">
         <div className="header_categoryfront">카테고리 검색바</div>
         <div
           className="header_categorybox"
@@ -141,9 +158,9 @@ const Header = () => {
         </div>
         <div
           className="header_categorybox"
-          onClick={() => categorysearch("뷰티")}
+          onClick={() => categorysearch("악세서리")}
         >
-          뷰티
+          악세서리
         </div>
         <div
           className="header_categorybox"
@@ -151,7 +168,10 @@ const Header = () => {
         >
           기타
         </div>
-      </div>
+        <div className="header_categorybox" onClick={naviChat}>
+          Chat
+        </div>
+      </div> */}
     </div>
   );
 };

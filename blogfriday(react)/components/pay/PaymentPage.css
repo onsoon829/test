@@ -91,7 +91,7 @@
 
 /* 버튼 스타일 */
 button.order-button {
-  background-color: #333;
+  background-color: #ff6b6b;
   color: #fff;
   padding: 0.8rem 1.5rem;
   border: none;
@@ -104,12 +104,30 @@ button.order-button {
 }
 
 button.order-button:hover {
-  background-color: #555;
+  background-color: #ff4d4d;
 }
 
 button.order-button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
+}
+.paymentMethod_box {
+  display: flex;
+  justify-content: space-between; /* 양쪽에 아이템 배치 */
+  align-items: center; /* 세로 중심 정렬 */
+  justify-content: space-evenly;
+}
+.paymentMethod_boxi {
+  display: flex;
+  /* background-color: #ff4d4d;s */
+}
+.paymenticorn {
+  width: 50px;
+  height: 50px;
+}
+.inputsize {
+  width: 20px;
+  height: 20px;
 }
 
 @media (max-width: 1024px) {

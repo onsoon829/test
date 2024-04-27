@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "./EditInfo.css"; // EditInfo.css 파일을 import 합니다.
+import "./Editinfo.css"; // EditInfo.css 파일을 import 합니다.
 
 const EditInfo = () => {
   const navichat = () => {
@@ -13,11 +13,17 @@ const EditInfo = () => {
   };
 
   const naviset = () => {
-    navigate("/chat/set");
+    if (window.confirm("로그아웃 하시겠습니까?")) {
+      navigate("/chat/set");
+    }
   };
 
   const goToEditInfo = () => {
     navigate("/editinfo");
+  };
+
+  const navishop = () => {
+    navigate("/shophome");
   };
   const navigate = useNavigate();
 
@@ -130,119 +136,122 @@ const EditInfo = () => {
   };
 
   return (
-    <div className="chat_body">
+    <div className="chat">
+      <div className="chat_body">
+        <div className="editinfo-form-container">
+          <div>
+            <form onSubmit={onSubmit}>
+              <div className="chatdot_header_tag">회원정보 수정하기</div>
+              <div className="editinfo-form-group mb-1">
+                <input
+                  type="email"
+                  className="form-control"
+                  name="user_idemail"
+                  placeholder="이메일"
+                  value={localStorage.user_idemail}
+                  readOnly
+                />
+              </div>
+              <div className="editinfo-form-group mb-1">
+                <input
+                  type="password"
+                  className="form-control"
+                  name="user_password"
+                  placeholder="비밀번호"
+                  value={user_password}
+                  onChange={handleValueChange}
+                />
+              </div>
+
+              <div className="editinfo-form-group mb-1">
+                <input
+                  type="password"
+                  className="form-control"
+                  name="user_password2"
+                  placeholder="비밀번호 확인"
+                  onChange={passChang}
+                />
+                <span>{passwordCheck}</span>
+              </div>
+              <div className="editinfo-form-group mb-1">
+                <input
+                  type="text"
+                  className="form-control"
+                  name="user_name"
+                  placeholder="이름"
+                  value={user_name}
+                  onChange={handleValueChange}
+                />
+              </div>
+
+              <div className="editinfo-form-group mb-1">
+                <input
+                  type="text"
+                  className="form-control"
+                  name="user_phonenumber"
+                  placeholder="연락처"
+                  value={user_phonenumber}
+                  onChange={handleValueChange}
+                />
+              </div>
+              <div className="editinfo-form-group mb-1">
+                <input
+                  type="text"
+                  className="form-control"
+                  name="user_nickname"
+                  placeholder="userNickname"
+                  value={user_nickname}
+                  onChange={handleValueChange}
+                />
+              </div>
+
+              <div className="editinfo-form-group-img"></div>
+              <div className="editinfo-form-group-prevbox">
+                {(previewImage || user_profile === null) && (
+                  <img
+                    src={previewImage}
+                    alt="프로필 이미지 미리보기"
+                    className="editinfo-profile-image-preview"
+                  />
+                )}
+                <div className="editinfo-form-group-prevbox2">
+                  <div className="infotexth">프로필 사진</div>
+                  <input
+                    type="file"
+                    className="form-control"
+                    id="profileImage"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+                  <div className="infotext">
+                    프로필 사진을 업로드 하지 않으면 기본이미지로 설정됩니다.
+                  </div>
+                  <button
+                    type="button"
+                    className="editinfo-btn btn-secondary"
+                    onClick={handleResetImage}
+                  >
+                    기본 이미지로 변경하기
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" className="editinfo-btn-edit">
+                회원정보 수정하기
+              </button>
+              <button className="editinfo-btn-edit" onClick={onCancel}>
+                수정 취소
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
       <div className="chat_menubar">
-        <div className="blank0"></div>
         <div className="chat_menubar_button_f" onClick={navihome}></div>
         <div className="chat_menubar_button_c" onClick={navichat}></div>
+        <div className="chat_menubar_button_shop" onClick={navishop}></div>
         <div className="chat_menubar_button_d_c"></div>
         <div className="chat_menubar_button_s" onClick={naviset}></div>
-      </div>
-      <div className="editinfo-form-container">
-        {" "}
-        {/* EditInfo 컴포넌트의 스타일을 적용합니다. */}
-        <div>
-          <div className="chat_header"></div>
-
-          <form onSubmit={onSubmit}>
-            <h1>회원정보 수정하기</h1>
-            <div className="editinfo-form-group mb-1">
-              <input
-                type="email"
-                className="form-control"
-                name="user_idemail"
-                placeholder="이메일"
-                value={localStorage.user_idemail}
-                readOnly
-              />
-            </div>
-            <div className="editinfo-form-group mb-1">
-              <input
-                type="password"
-                className="form-control"
-                name="user_password"
-                placeholder="비밀번호"
-                value={user_password}
-                onChange={handleValueChange}
-              />
-            </div>
-
-            <div className="editinfo-form-group mb-1">
-              <input
-                type="password"
-                className="form-control"
-                name="user_password2"
-                placeholder="비밀번호 확인"
-                onChange={passChang}
-              />
-              <span>{passwordCheck}</span>
-            </div>
-            <div className="editinfo-form-group mb-1">
-              <input
-                type="text"
-                className="form-control"
-                name="user_name"
-                placeholder="이름"
-                value={user_name}
-                onChange={handleValueChange}
-              />
-            </div>
-
-            <div className="editinfo-form-group mb-1">
-              <input
-                type="text"
-                className="form-control"
-                name="user_phonenumber"
-                placeholder="연락처"
-                value={user_phonenumber}
-                onChange={handleValueChange}
-              />
-            </div>
-            <div className="editinfo-form-group mb-1">
-              <input
-                type="text"
-                className="form-control"
-                name="user_nickname"
-                placeholder="userNickname"
-                value={user_nickname}
-                onChange={handleValueChange}
-              />
-            </div>
-
-            <div className="editinfo-form-group mb-1">
-              <label htmlFor="profileImage">프로필 사진</label>
-              <input
-                type="file"
-                className="form-control"
-                id="profileImage"
-                accept="image/*"
-                onChange={handleFileChange}
-              />
-              {(previewImage || user_profile === null) && (
-                <img
-                  src={previewImage}
-                  alt="프로필 이미지 미리보기"
-                  className="editinfo-profile-image-preview"
-                />
-              )}
-              <button
-                type="button"
-                className="editinfo-btn btn-secondary"
-                onClick={handleResetImage}
-              >
-                기본 이미지로 변경하기
-              </button>
-            </div>
-            <hi>프로필 사진을 업로드 하지 않으면 기본이미지로 설정됩니다.</hi>
-
-            <button type="submit" className="editinfo-btn btn-primary">
-              회원정보 수정하기
-            </button>
-            <button type="button" onClick={onCancel}>
-              수정 취소
-            </button>
-          </form>
-        </div>
       </div>
     </div>
   );
